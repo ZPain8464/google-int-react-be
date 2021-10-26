@@ -1,0 +1,26 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "author": "Zach",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "getstream": "^7.2.11",
+    "google-auth-library": "^7.10.0",
+    "googleapis": "^88.2.0",
+    "nodemon": "^2.0.13",
+    "open": "^8.3.0",
+    "server-destroy": "^1.0.1",
+    "stream-chat": "^4.2.0"
+  }
+}
