@@ -12,6 +12,12 @@ app.use(bodyParser.json({
     }
 }));
 
+
+app.use((request, response, next) => {
+    console.log("Incoming url " + request.originalUrl)
+    next();
+});
+
 const PORT = "3001";
 require('dotenv').config();
 
@@ -25,6 +31,19 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes);
 
+const commandHandler = (req, res) => {
+    const { user, message, form_data } = req.body;
+
+    console.log(JSON.stringify(message));
+    message.text = "Hello there, we can update this with GCal data";
+    return res.status(200).json({ ...req.body, message });
+}
+
+app.post('/', commandHandler);
+
+
 app.listen(PORT, () => {
     console.log(`server running on http://localhost:${PORT}`);
 })
+
+
