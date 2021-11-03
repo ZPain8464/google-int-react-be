@@ -10,6 +10,7 @@
   "author": "Zach",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.24.0",
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
@@ -20,7 +21,9 @@
     "googleapis": "^88.2.0",
     "nodemon": "^2.0.13",
     "open": "^8.3.0",
+    "path": "^0.12.7",
     "server-destroy": "^1.0.1",
+    "sqlite3": "^5.0.2",
     "stream-chat": "^4.2.0"
   }
 }
