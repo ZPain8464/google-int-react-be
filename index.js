@@ -43,7 +43,7 @@ const commandHandler = async (req, res) => {
     
     const setToken = async () => {
         const token = await fetchToken;
-        console.log(token)
+        
         const url = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
 
         const response = await axios.get(url, {
@@ -54,24 +54,35 @@ const commandHandler = async (req, res) => {
             },
             params: {
                 timeMin: (new Date()).toISOString(),
-                maxResults: 10,
+                maxResults: 5,
                 singleEvents: true,
+                timeMin: (new Date()).toISOString(),
                 orderBy: 'startTime', 
             }
         });
-        const auth = google._options.auth;
-        // TODO
-        // If access_token is expired 
-        // const getRefreshToken = `SELECT refresh_token FROM users WHERE email="email"`;
-        // db.all(getRefreshToken, [], (err, rows) => {
-        // if (err) return console.error(err.message);
-        // const refreshToken = rows[0].refresh_token;
-        // })
-        // auth.setCredentials({refresh_token: `refresh_token`});
+        
         const r = await response;
+        
         const events = r.data.items;
-        const list = events.map(event => `${event.start.dateTime} - ${event.summary}`)
-    message.text = `Here are today's events: ${list}`
+        const list = events.map(event => {
+            const start = event.start.dateTime.substr(11, 5).trim();
+            const end = event.end.dateTime.substr(11, 5).trim();
+            const summary = event.summary.trim();
+            const eventString = `\n- ` + start +` - `+ end + ` : ` + summary;
+            
+           return eventString
+        })
+        message.text = ''; // remove user input
+        
+        message.mml = `<mml>
+                        <text>
+                        Here are your events today: 
+                        </text>
+                        <md>
+                        ${list}
+                        </md>
+                        </mml>`
+    // message.text = `Here are today's events: ${list}`
     return res.status(200).json({ ...req.body, message });
 }
 setToken();

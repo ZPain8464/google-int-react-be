@@ -59,7 +59,7 @@ const signup = async (req, res) => {
 
 const setupCommands = async (serverClient) => {
     try {
-        const ngrokUrl = `https://09a943281fcf.ngrok.io`;
+        const ngrokUrl = `https://60e01ec86d18.ngrok.io`;
         const cmds = await serverClient.listCommands();
 
         if (!cmds.commands.find(({name}) => name === 'gcal')) {
@@ -93,7 +93,7 @@ const login = async (req, res) => {
             audience: process.env.GOOGLE_CLIENT_ID
         });
 
-        const {name, email, picture} = (await ticket).getPayload() 
+        const {name, email} = (await ticket).getPayload() 
         const url = oAuth2Client.generateAuthUrl({
 
             access_type: 'offline',
@@ -102,22 +102,20 @@ const login = async (req, res) => {
         });
 
         // Stream Auth
-        const user_id = "3ca286c2a3c33f2b6672da7a190160f8"
         const serverClient = StreamChat.getInstance(api_key, api_secret, app_id);
-        const token = serverClient.createToken(user_id);
         await setupCommands(serverClient);
 
         // SQL Queries -- Find user if exists; Otherwise, insert new user
-        dataModel.findUser(email).then((rows) => {
-            console.log("user found: ", rows)
-            if(!rows) {
-                dataModel.insertUsers(name, email, user_id).then((newUser) => {
-                    console.log(newUser)
-                })
-            }
-        });
+        const userFound = await dataModel.findUser(email);
+        if(!userFound) {
+            dataModel.insertUsers(name, email, user_id).then((newUser) => {
+                console.log(newUser)
+            })
+        }
+        const user_id = userFound.user_id;
+        const token = serverClient.createToken(user_id);
 
-        res.status(200).json({token, user_id, name, email, picture, url})
+        res.status(200).json({token, user_id, name, email, url})
     } catch (error) {
         console.log(error);
 
@@ -126,25 +124,32 @@ const login = async (req, res) => {
 }
 
 const googleauth = async (req, res) => {
+    
     try {
         const { email } = req.body;
         const {code} = req.body;
+
         const r = await oAuth2Client.getToken(code);
 
         oAuth2Client.setCredentials(r.tokens);
-
-        // Store access_token and refresh_token
-        oAuth2Client.on('tokens', (tokens) => {
+ 
+        oAuth2Client.on('tokens', async (tokens) => {
+            // On first authorization, store access_ and refresh_token
         if (tokens.refresh_token) {
             const refresh_token = tokens.refresh_token;
             dataModel.updateRefreshToken(refresh_token, email)
-            console.log("Refresh token:", tokens.refresh_token);
+            const access_token = tokens.access_token;
+            dataModel.updateAccessToken(access_token, email);
         }
-        // console.log(tokens.access_token);
-        const access_token = tokens.access_token;
-        dataModel.updateAccessToken(access_token, email);
+            // Once access_token expires, exchange refresh_token for a new one
+            const refToken = await dataModel.getRefreshToken(email);
+            oAuth2Client.setCredentials({
+                refresh_token: refToken.refresh_token
+              });
+              console.log("new access token: ", tokens);
+              const access_token = tokens.access_token;
+              dataModel.updateAccessToken(access_token, email);
         });
-        
         
         const token = r.tokens.access_token;
 

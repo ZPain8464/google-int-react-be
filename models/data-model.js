@@ -49,6 +49,15 @@ const db = require("../database/db");
             });
         })
     }
+    function getRefreshToken(email) {
+        return new Promise((resolve, reject) => {
+            const getToken = `SELECT refresh_token FROM users WHERE email="${email}"`; 
+            db.get(getToken, [], (err, token) => {
+                if(err) console.log(err.message);
+                resolve(token);
+            });
+        })
+    }
+    
 
-
-module.exports = {findUser, insertUsers, updateRefreshToken, updateAccessToken, getAccessToken}
+module.exports = {findUser, insertUsers, updateRefreshToken, updateAccessToken, getAccessToken, getRefreshToken}
