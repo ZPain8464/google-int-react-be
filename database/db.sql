@@ -7,8 +7,7 @@
 CREATE TABLE IF NOT EXISTS users (
     name TEXT DEFAULT "", 
     email TEXT DEFAULT "", 
-    user_id TEXT DEFAULT "", 
-    access_token TEXT DEFAULT "", 
+    user_id TEXT DEFAULT "",  
     refresh_token TEXT DEFAULT ""
 );
 
