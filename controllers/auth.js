@@ -7,8 +7,6 @@ require('dotenv').config();
 const {google} = require('googleapis');
 const { OAuth2Client } = require('google-auth-library');
 
-require('dotenv').config();
-
 const scopes = ['https://www.googleapis.com/auth/calendar', 'https://www.googleapis.com/auth/calendar.events'];
 
 // Set Google and Stream environment variables 
@@ -36,7 +34,7 @@ google.options({
 
 const setupCommands = async (serverClient) => {
     try {
-        const ngrokUrl = `https://60e01ec86d18.ngrok.io/auth/handlewebhook`;
+        const ngrokUrl = `https://d04323b712e3.ngrok.io/auth/handlewebhook`;
         const cmds = await serverClient.listCommands();
 
         if (!cmds.commands.find(({name}) => name === 'gcal')) {
@@ -73,7 +71,7 @@ const login = async (req, res) => {
         const {name, email} = (await ticket).getPayload() 
         const url = oAuth2Client.generateAuthUrl({
             access_type: 'offline',
-            scope: scopes
+            scope: scopes 
         });
 
         // Stream Auth
@@ -122,10 +120,8 @@ const googleauth = async (req, res) => {
             });
 
             oAuth2Client.setCredentials(r.tokens);
-            oAuth2Client.setCredentials({refresh_token: r.tokens.refresh_token});
-            const token = r.tokens.access_token;
 
-            return res.json({token: token})
+            return res.status(200).json({message: "User authorized"})
         }
         res.status(200).json({message: "User authorized"});
     } catch (error) {
